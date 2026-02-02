@@ -32,6 +32,7 @@ email=wiener@normal-user.com
 - GET-запрос: достаточно ссылки на уязвимом сайте `<img src="https://vulnerable-website.com/email/change?email=pwned@evil-user.net">`
 ## Инструменты
 - Генераторы CSRF PoC: Burp Suite Professional (Engagement tools / Generate CSRF PoC), [CSRF PoC Generator](https://security.love/CSRF-PoC-Genorator/)
+- Страницу с PoC можно запостить с помощью GitHub Pages, [localhost.run](https://localhost.run/) (`python -m http.server 8080`; `ssh -R 80:localhost:8080 nokey@localhost.run`) 
 ## Способы защиты от CSRF
 - CSRF token: уникальный токен, который генерируется на сервере и который пользователь должен добавить к запросу
 - SameSite: механизм браузера, определяющий с какого сайта куки, выключенный в запрос
