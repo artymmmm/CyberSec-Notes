@@ -96,4 +96,4 @@ email=wiener@normal-user.com
 </script>
 ```
 - Использование перенаправлений в рамках одного сайта (Same Site) - жертва заходит на сайт злоумышленника, который перенаправляет на страницу сайта, перенаправляющую на другую страницу сайта: `<script> document.location = 'https://<target>/post/comment/confirmation?postId=../my-account/change-email?email=evil%40gmail.com%26submit=1';</script>`
-- 
+- Использование поддоменов или доменов с одним родительским доменом (sibling domain: `shop.company.com` и `blog.company.com`), с помощью которых можно совершить вторичные запросы (например, с использованием XSS)
