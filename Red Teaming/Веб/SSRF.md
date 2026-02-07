@@ -1,2 +1,0 @@
-## Инструменты
-- Burp Suite Collaborator
