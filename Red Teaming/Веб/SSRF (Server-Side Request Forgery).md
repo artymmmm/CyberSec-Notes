@@ -1,6 +1,6 @@
 Server-side request forgery - уязвимость, которая позволяет атакующему выполнять запросы от серверной части приложения к непреднамеренному расположению (например, к внутреннему сервису организации или к домену, который контролирует атакующий)
 ## Источники информации
-- [SSRF Topic PortSwigger Academy](https://portswigger.net/web-security/ssrf)
+- [SSRF Learning Path PortSwigger Academy](https://portswigger.net/web-security/learning-paths/ssrf-attacks)
 - [PayloadAllTheThings SSRF](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Server%20Side%20Request%20Forgery)
 - [SSRF Payloads 1](https://gist.github.com/ResistanceIsUseless/0c2df8ef3604a654e390c5d0070eaad6)
 - [SSRF Payloads 2](https://github.com/InfoSecWarrior/Offensive-Payloads/blob/main/Server-Side-Request-Forgery-Payloads.txt)
