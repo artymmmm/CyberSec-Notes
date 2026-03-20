@@ -4,6 +4,7 @@
 - [Prompt-Injection-Everywhere](https://github.com/TakSec/Prompt-Injection-Everywhere)
 - [System Prompt Leaks](https://github.com/asgeirtj/system_prompts_leaks)
 - [Prompt Hacking](https://learnprompting.org/docs/prompt_hacking/introduction)
+- [20 Prompt Injection Techniques Every Red Teamer Should Test](https://fdzdev.medium.com/20-prompt-injection-techniques-every-red-teamer-should-test-b22359bfd57d)
 ## Промпт-инъекции
 ### Прямые
 #### Эксплуатирование API
