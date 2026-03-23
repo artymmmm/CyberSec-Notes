@@ -1,4 +1,4 @@
- ## Источники информации
+	 ## Источники информации
 - [SPbCTF A&D Кароч: первым делом на вулнбоксе](https://www.youtube.com/watch?v=hxEQdgabKUQ&t=901s&pp=ugUEEgJydQ%3D%3D)
 - [SPbCTF A&D: мониторинг атак и патчинг](https://www.youtube.com/live/MfFVUaakUlY?si=R3ZYsTnb5JoRqE6U)
 ## Первые действия на вулнбоксе
@@ -37,6 +37,106 @@
 - `scp -r team18@7.1.1.1:/home /tmp/` - копирование по пути
 - `sftp team18@7.1.1.1` - открывается шелл с возможностью делать `cd`, `ls`
 - [FileZilla](https://filezilla-project.org/download.php?type=client) (GUI)
+## Docker
+### Провера запущенных контейнеров и образов
+Статус, имя образа, на котором основан, проброс портов: `docker ps -a`
+Список образов: `docker image ls`
+### Исходники
+Поиск в `/home`:
+- `find / -name Dockerfile`
+- `find / -name docker-compose.yml`
+### Бэкап контейнера
+- `docker export '<имя (или ID) контейнера>' > name.tar`
+### Полезное в CTF
+Запуск дополнительного процесса в контейнере (`bash`) и присоединение к нему с максимальными привилегиями: `docker exec -ti --privileged '<имя (или ID) контейнера>' /bin/bash`
+Копирование файлов между хостовой машиной и контейнером:
+- `docker cp [OPTIONS] CONTAINER:SRC_PATH DEST_PATH|-`
+- `docker cp [OPTIONS] SRC_PATH|- CONTAINER:DEST_PATH`
+Запуск/остановка контейнера:
+- `docker start/stop '<имя (или ID) контейнера'>`
+Сохранение изменений (в tag помечается версия):
+- `docker commit 'ID контейнера' 'имя image':'tag'`
+
+
+docker run [параметры] 'имя image'
+#сделает pull + create + start
+root      3675 0.0 0.0  4384  816 ?       Ss  Oct25  0:00 |      \_ /app/serv 10556
+#найдем в 'ps auxf' PID запущенного в контейнере процесса (а не самого docker-процесса)
+ll /proc/3675/root/
+#быстрый доступ в корень fs контейнера, без проброса общих папок и т.п.
+#### 6.Будет полезным дополнительно
+
+docker pull 'имя image'
+
+#выкачиваем image с hub.docker.com
+
+docker rm 'имя (или ID) контейнера'
+
+#удалить контейнер
+
+docker rmi 'имя image'
+
+#удалить image
+
+docker attach 'имя (или ID) контейнера'
+
+#подцепиться к stdin/stdout текущего процесса в контейнере
+
+ctrl+p, ctrl+q
+
+#аккуратно отцепимся от контейнера, не дропнув его
+
+  
+
+#### 7.Отдельно про параметры 'docker run'
+
+-d #отправим в фон
+
+-ti #получим ввод/вывод (обязательный набор для /bin/bash)
+
+-v #сделаем общую папку, на хост машине тут: /var/lib/docker/volumes/
+
+-p #проброс портов
+
+--restart always #будет следить, чтоб всегда был в UP
+
+  
+
+Эти параметры задаются на стадии create и при start уже не доступны для изменения!
+### Пример Dockerfile
+```dockerfile
+FROM ubuntu
+WORKDIR /app
+COPY ./files /app
+EXPOSE 4125
+RUN apt-get update && apt-get install -y python3 python3-pip && pip3 install flask
+CMD ["/app/server.py"]
+```
+### Создание своего образа (для этого требуется Dockerfile)
+- `docker build -t 'имя image' .`
+### Docker-compose
+Удобный run всего, что прописано в yml файле: 
+- `docker-compose up -d`
+### Пример docker-compose.yml
+```yml
+version: '3'
+services:
+ cryptobulki:
+  image: "i_cryptobulki"
+  restart: always
+  ports:
+    - "4125:4125"
+ smartbox:
+  image: "i_smartbox"
+  restart: always
+  ports:
+    - "10556:10556"
+ dungeon:
+  image: "i_dungeon:ver_1"
+  restart: always
+  ports:
+    - "666:666"
+```
 ## Защита
 ### Смена паролей
 - Сменить пароли пользователей, админов в сервисах
@@ -100,3 +200,9 @@
 - `sed` работает построчно, поэтому будет работать только с протоколами, у которых любые данные заканчиваются переводом строки. Иначе `sed` не отдаст данные, пока не встретит перевод строки. Можно заменить `sed` своим скриптом, который не будет заточен под строчки
 - `\` для `sed` пришлось превратить в `\\` из-за экранирования в `socat`. Можно заменить всю команду на вызов внешнего скрипта, в котором уже будет этот пайплайн: `exec:/path/to/script.sh`
 - убирать флаги по регулярке - сломает чекер. Он же их тоже проверяет
+## Чекер
+Чекер каждый раунд делает следующие действия:
+- Check: проверка функциональности сервиса
+- Put: чекер кладет новый флаг в сервис
+- Get: чекер достает один из старых флагов
+Флаги протухают после нескольких раундов (обычно 3-4 раунда). Один раунд  ≈ 5 минут.
