@@ -47,7 +47,13 @@
 - `find / -name Dockerfile`
 - `find / -name docker-compose.yml`
 ### Бэкап контейнера
-- `docker export '<имя (или ID) контейнера>' > name.tar`
+- `docker export '<имя (или ID) контейнера>' > name.tar`  
+### Патчинг контейнера
+1. Скопировать файлы из контейнера: `docker cp <container_id>:/app /tmp/backup`
+2. Пропатчить файлы
+3. Скопировать файлы в контейнер: `docker cp patched_file <container_id>:/app/file`
+4. Перезапустить контейнер: `docker restart <container_id>`  
+5. Добавить изменения в образ: `docker commit <container_id> <new_image>`  
 ### Полезное в CTF
 Запуск дополнительного процесса в контейнере (`bash`) и присоединение к нему с максимальными привилегиями: `docker exec -ti --privileged '<имя (или ID) контейнера>' /bin/bash`  
 Копирование файлов между хостовой машиной и контейнером:
@@ -81,7 +87,7 @@ RUN apt-get update && apt-get install -y python3 python3-pip && pip3 install fla
 CMD ["/app/server.py"]
 ```
 ### Создание своего образа (для этого требуется Dockerfile)
-- `docker build -t 'имя image' .`
+- `docker build -t <image name> .`
 ### Docker-compose
 Удобный run всего, что прописано в yml файле: 
 - `docker-compose up -d`
