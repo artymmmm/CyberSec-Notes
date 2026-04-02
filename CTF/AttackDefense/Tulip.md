@@ -124,14 +124,14 @@ FLAG_VALIDATOR_TEAM=42
 8. `ssh-keygen -t ed25519 -a 100 -f ~/.ssh/vulnbox_pcap -C "pcap-sync"`
 9. `sudo useradd -m -s /bin/bash pcapsync` (на вулнбоксе)
 10. `sudo mkdir -p /pcaps` (на вулнбоксе)
-11. `sudo chown root:pcapsync /pcaps` (на вулнбоксе)
-12. `sudo chmod 750 /pcaps` (на вулнбоксе)
+11. `sudo chown root:pcapsync /home/pcapsync/pcaps` (на вулнбоксе)
+12. `sudo chmod 750 /home/pcapsync/pcaps` (на вулнбоксе)
 13. `sudo usermod -aG pcapsync pcapsync` (на вулнбоксе)
 14. `sudo -u pcapsync mkdir -p /home/pcapsync/.ssh` (на вулнбоксе)
 15. `sudo -u pcapsync chmod 700 /home/pcapsync/.ssh` (на вулнбоксе)
 16. `ssh-copy-id -i ~/.ssh/vulnbox_pcap.pub pcapsync@<VULNBOX_IP>`
 17. `ssh -i ~/.ssh/vulnbox_pcap pcapsync@<VULNBOX_IP>` (тест логина без пароля)
-18. `sudo tcpdump -i eth0 -n -s 0 -G 180 -W 0 -w '/pcaps/traffic_%Y-%m-%d_%H-%M-%S.pcap'`
+18. `sudo tcpdump -i eth0 -n -s 0 -G 180 -Z root -w '/home/pcapsync/pcaps/traffic_%Y-%m-%d_%H-%M-%S.pcap'`
 19. `vim ~/.ssh/config` (заменить IP в конфиге!):
 ```
 Host vulnbox-pcap
@@ -143,7 +143,7 @@ Host vulnbox-pcap
     ServerAliveCountMax 3
     StrictHostKeyChecking accept-new
 ```
-20. `rsync -av --ignore-existing --include='traffic_*.pcap' --exclude='*'  vulnbox-pcap:/pcaps/ /home/user/ctf/tulip/services/pcap/` (ручной тест)
+20. `rsync -av --ignore-existing --include='traffic_*.pcap' --exclude='*'  vulnbox-pcap:/home/pcapsync/pcaps/ /home/user/ctf/tulip/services/pcap/` (ручной тест)
 21. `sudo vim /usr/local/bin/pull-vulnbox-pcaps.sh`:
 ```bash
 #!/usr/bin/env bash
@@ -156,7 +156,7 @@ mkdir -p "$DEST"
 
 rsync -av --ignore-existing \
   --include='traffic_*.pcap' --exclude='*' \
-  "${HOST}:/pcaps/" "$DEST/"
+  "${HOST}:/home/pcapsync/pcaps/" "$DEST/"
 ```
 22. `sudo chmod +x /usr/local/bin/pull-vulnbox-pcaps.sh`
 23. `sudo vim /etc/systemd/system/pull-vulnbox-pcaps.service` (поменять имя пользователя локального в `User`):
